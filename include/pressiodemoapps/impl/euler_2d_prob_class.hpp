@@ -61,6 +61,23 @@ public:
     allocateGhosts();
   }
 
+  EigenEuler2dApp(const MeshType & meshObj,
+		  ::pressiodemoapps::Euler2d probEnum,
+		  ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+		  ::pressiodemoapps::InviscidFluxScheme fluxEnum,
+		  int icIdentifier,
+		  scalar_type pTopRight)
+    : m_meshObj(meshObj), m_probEn(probEnum), m_recEn(recEnum),
+      m_fluxEn(fluxEnum), m_icIdentifier(icIdentifier),
+      pressureTopRight_(pTopRight)
+
+  {
+    // calculate total num of dofs on sample and stencil mesh
+    m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
+    allocateGhosts();
+  }
+
   scalar_type gamma() const{
     return m_gamma;
   }
@@ -257,11 +274,11 @@ private:
 
       case ::pressiodemoapps::Euler2d::Riemann:{
 	if( m_icIdentifier == 1){
-	  riemann2dIC1(initialState, m_meshObj, m_gamma);
+	  riemann2dIC1(initialState, m_meshObj, m_gamma, pressureTopRight_);
 	  return initialState;
 	}
 	else if (m_icIdentifier == 2){
-	  riemann2dIC2(initialState, m_meshObj, m_gamma);
+	  riemann2dIC2(initialState, m_meshObj, m_gamma, pressureTopRight_);
 	  return initialState;
 	}
 	else{
@@ -1051,6 +1068,8 @@ protected:
 
   const std::array<scalar_type, 2> normalX_{1, 0};
   const std::array<scalar_type, 2> normalY_{0, 1};
+
+  scalar_type pressureTopRight_ = 1.5;
 };
 
 template<class MeshType> constexpr int EigenEuler2dApp<MeshType>::numDofPerCell;

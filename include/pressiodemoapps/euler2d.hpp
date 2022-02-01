@@ -122,8 +122,22 @@ auto create_problem_eigen(const mesh_t & meshObj,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
   return create_problem_eigen(meshObj, probEnum, recEnum,
-			    InviscidFluxScheme::Rusanov, 1);
+			      InviscidFluxScheme::Rusanov, 1);
 }
+
+// hardwired for Riemann2d
+template<class mesh_t>
+auto create_problem_eigen(const mesh_t & meshObj,
+			  ::pressiodemoapps::Euler2d probEnum,
+			  ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+			  int initCondIdentifier,
+			  typename mesh_t::scalar_t pressureTopRight)
+{
+  using p_t = ::pressiodemoapps::ee::impl::EigenEuler2dApp<mesh_t>;
+  using RetType = PublicProblemMixinCpp<p_t>;
+  return RetType(meshObj, probEnum, recEnum, InviscidFluxScheme::Rusanov, initCondIdentifier, pressureTopRight);
+}
+
 #endif
 
 }//end namespace pressiodemoapps
